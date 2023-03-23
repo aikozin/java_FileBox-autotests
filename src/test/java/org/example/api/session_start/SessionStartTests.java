@@ -5,7 +5,7 @@ import org.example.filebox.api.retrofit.models.session_start.SessionStartRequest
 import org.example.filebox.api.retrofit.models.session_start.SessionStartResponse;
 import org.example.filebox.db.helpers.DataBaseHelper;
 import org.example.filebox.db.jdbc.entities.SessionDao;
-import org.junit.jupiter.api.Assertions;
+import org.example.filebox.helpers.LoggerHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,10 +14,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static org.example.filebox.api.helpers.ErrorsEnum.ERROR_REQUEST_PARAMETERS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.example.filebox.helpers.DataHepler.*;
+import static org.example.filebox.helpers.LoggerHelper.isEquals;
+import static org.example.filebox.helpers.LoggerHelper.isTrue;
 
 public class SessionStartTests {
 
@@ -26,8 +29,9 @@ public class SessionStartTests {
 
     @BeforeAll
     public static void init() {
-        apiHelper = new ApiHelper();
-        dataBaseHelper = new DataBaseHelper();
+        Logger logger = LoggerHelper.create(SessionStartTests.class.getName());
+        apiHelper = new ApiHelper(logger);
+        dataBaseHelper = new DataBaseHelper(logger);
     }
 
     @Test
@@ -38,15 +42,18 @@ public class SessionStartTests {
 
         SessionStartRequest sessionStartRequest = new SessionStartRequest(webIp, webAgent);
         SessionStartResponse sessionStartResponse = apiHelper.sessionStart(sessionStartRequest);
+        long timeStartExpected = calculateStartTimeInSec();
+        long timeEndExpected = calculateEndTimeInSec(timeStartExpected, 5);
+
         String idSessionJson = sessionStartResponse.getIdSession();
 
         SessionDao sessionDao = dataBaseHelper.findSession(idSessionJson);
 
-        Assertions.assertAll(
-                () -> assertEquals(idSessionJson, sessionDao.getIdSession()),
-                () -> assertEquals(webAgent, sessionDao.getWebAgent()),
-                () -> assertEquals(webIp, sessionDao.getWebIp())
-        );
+        isEquals("db_idSessionJson", idSessionJson, sessionDao.getIdSession());
+        isEquals("db_webAgent", webAgent, sessionDao.getWebAgent());
+        isEquals("db_webIp", webIp, sessionDao.getWebIp());
+        isEquals("db_timeStartExpected", timeStartExpected, convertTimeStampToSec(sessionDao.getTimeStart()));
+        isEquals("db_timeEndExpected", timeEndExpected, convertTimeStampToSec(sessionDao.getTimeEnd()));
     }
 
     private static Stream<Arguments> parametersSource() {
@@ -64,10 +71,11 @@ public class SessionStartTests {
         int sessionCountBefore = dataBaseHelper.getSessionsCount();
 
         SessionStartRequest sessionStartRequest = new SessionStartRequest(webIp, webAgent);
-        Assertions.assertTrue(apiHelper.checkErrorResponse(sessionStartRequest, ERROR_REQUEST_PARAMETERS.getValue()));
 
         int sessionCountAfter = dataBaseHelper.getSessionsCount();
 
-        Assertions.assertEquals(sessionCountAfter, sessionCountBefore);
+        isTrue("Errors equal",
+                apiHelper.checkErrorResponse(sessionStartRequest, ERROR_REQUEST_PARAMETERS.getValue()));
+        isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
     }
 }
