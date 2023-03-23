@@ -10,4 +10,11 @@ public class SessionStartResponse {
     public String getIdSession() {
         return idSession;
     }
+
+    @Override
+    public String toString() {
+        return "SessionStartResponse{" +
+                "idSession='" + idSession + '\'' +
+                '}';
+    }
 }

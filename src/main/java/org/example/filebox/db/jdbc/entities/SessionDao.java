@@ -30,6 +30,19 @@ public class SessionDao {
         this.mobileAgent = mobileAgent;
     }
 
+    @Override
+    public String toString() {
+        return "SessionDao{" +
+                "idSession='" + idSession + '\'' +
+                ", timeStart=" + timeStart +
+                ", timeEnd=" + timeEnd +
+                ", webIp='" + webIp + '\'' +
+                ", webAgent='" + webAgent + '\'' +
+                ", mobileIp='" + mobileIp + '\'' +
+                ", mobileAgent='" + mobileAgent + '\'' +
+                '}';
+    }
+
     public String getIdSession() {
         return idSession;
     }

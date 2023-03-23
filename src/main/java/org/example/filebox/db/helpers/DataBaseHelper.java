@@ -6,14 +6,17 @@ import org.example.filebox.db.jdbc.entities.SessionDao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Logger;
 
 import static org.example.filebox.db.jdbc.entities.SessionDao.*;
 
 public class DataBaseHelper {
 
     private static Statement db;
+    private final Logger logger;
 
-    public DataBaseHelper() {
+    public DataBaseHelper(Logger logger) {
+        this.logger = logger;
         db = DBConnector.createConnection();
     }
 
@@ -28,15 +31,11 @@ public class DataBaseHelper {
         try {
             ResultSet result = db.executeQuery(query);
             if (result.next()) {
-                return new SessionDao(
-                        result.getString(ID_SESSION),
-                        result.getTimestamp(TIME_START),
-                        result.getTimestamp(TIME_END),
-                        result.getString(WEB_IP),
-                        result.getString(WEB_AGENT),
-                        result.getString(MOBILE_IP),
-                        result.getString(MOBILE_AGENT)
-                );
+                SessionDao sessionDao = new SessionDao(result.getString(ID_SESSION), result.getTimestamp(TIME_START),
+                        result.getTimestamp(TIME_END), result.getString(WEB_IP), result.getString(WEB_AGENT),
+                        result.getString(MOBILE_IP), result.getString(MOBILE_AGENT));
+                logger.info(sessionDao.toString());
+                return sessionDao;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Не удалось получить записи из таблицы: " + e.getMessage());
@@ -54,6 +53,7 @@ public class DataBaseHelper {
         try {
             ResultSet result = db.executeQuery(query);
             if (result.next()) {
+                logger.info("Count rows in session table = " + result.getInt(1));
                 return result.getInt(1);
             }
         } catch (SQLException e) {
