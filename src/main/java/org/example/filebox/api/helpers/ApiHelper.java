@@ -1,5 +1,8 @@
 package org.example.filebox.api.helpers;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import org.example.filebox.api.retrofit.ApiMethods;
 import org.example.filebox.api.retrofit.RetrofitClient;
@@ -10,6 +13,7 @@ import org.example.filebox.api.retrofit.models.session_start.SessionStartRespons
 import retrofit2.Call;
 import retrofit2.Response;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -24,10 +28,7 @@ public class ApiHelper {
     }
 
     /**
-     * Метод ручки /session/start
-     *
-     * @param sessionStartRequest тело с web_agent и web_ip
-     * @return тело с id_session
+     * Методы ручки /session/start
      */
     public SessionStartResponse sessionStart(SessionStartRequest sessionStartRequest) throws IOException {
         Call<SessionStartResponse> call = apiMethods.restSessionStart(sessionStartRequest);
@@ -40,11 +41,12 @@ public class ApiHelper {
         }
     }
 
+    public ResponseBody sessionStartError(SessionStartRequest sessionStartRequest) throws IOException {
+        return apiMethods.restSessionStart(sessionStartRequest).execute().errorBody();
+    }
+
     /**
-     * Метод ручки /session/mobile/connect
-     *
-     * @param sessionMobileConnectRequest тело с id_session, mobile_agent и mobile_ip
-     * @return тело с time_end, time_start, web_agent и web_ip
+     * Методы ручки /session/mobile/connect
      */
     public SessionMobileConnectResponse sessionMobileConnect(SessionMobileConnectRequest sessionMobileConnectRequest)
             throws IOException {
@@ -58,34 +60,36 @@ public class ApiHelper {
         }
     }
 
-    /**
-     * Проверка текста ошибки в ответе на запрос
-     *
-     * @param sessionStartRequest тело запроса
-     * @param errorMessage        ожидаемый текст ошибки
-     * @return true, если текст ошибки совпал
-     */
-    public boolean checkErrorResponse(SessionStartRequest sessionStartRequest, String errorMessage)
+    public ResponseBody sessionMobileConnectError(SessionMobileConnectRequest sessionMobileConnectRequest)
             throws IOException {
-        Call<SessionStartResponse> call = apiMethods.restSessionStart(sessionStartRequest);
-        ResponseBody responseBody = call.execute().errorBody();
-        assert responseBody != null;
-        String errorMessageActual = responseBody.string();
-        logger.info(errorMessageActual);
-        return errorMessageActual.contains(errorMessage);
+        return apiMethods.restSessionMobileConnect(sessionMobileConnectRequest).execute().errorBody();
+    }
+
+    /**
+     * Метод отправки файла на сервер
+     */
+    public Response<Void> dataSend(File file, String idSession, String type, String source) throws IOException {
+        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(),
+                RequestBody.create(MediaType.parse("multipart/form-data"), file));
+        Call<Void> call = apiMethods.restDataSend(filePart, idSession, type, source);
+        return call.execute();
+    }
+
+    public ResponseBody dataSendErrorWithoutFile(String idSession, String type, String source)
+            throws IOException {
+        return apiMethods.restDataSendWithoutFile(idSession, type, source).execute().errorBody();
+    }
+
+    public ResponseBody dataSendError(File file, String idSession, String type, String source) throws IOException {
+        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(),
+                RequestBody.create(MediaType.parse("multipart/form-data"), file));
+        return apiMethods.restDataSend(filePart, idSession, type, source).execute().errorBody();
     }
 
     /**
      * Проверка текста ошибки в ответе на запрос
-     *
-     * @param sessionMobileConnectRequest тело запроса
-     * @param errorMessage                ожидаемый текст ошибки
-     * @return true, если текст ошибки совпал
      */
-    public boolean checkErrorResponse(SessionMobileConnectRequest sessionMobileConnectRequest, String errorMessage)
-            throws IOException {
-        Call<SessionMobileConnectResponse> call = apiMethods.restSessionMobileConnect(sessionMobileConnectRequest);
-        ResponseBody responseBody = call.execute().errorBody();
+    public boolean checkErrorResponse(ResponseBody responseBody, String errorMessage) throws IOException {
         assert responseBody != null;
         String errorMessageActual = responseBody.string();
         logger.info(errorMessageActual);
