@@ -1,5 +1,6 @@
 package org.example.api.session_start;
 
+import okhttp3.ResponseBody;
 import org.example.filebox.api.helpers.ApiHelper;
 import org.example.filebox.api.retrofit.models.session_mobile_connect.SessionMobileConnectRequest;
 import org.example.filebox.api.retrofit.models.session_mobile_connect.SessionMobileConnectResponse;
@@ -118,7 +119,9 @@ public class SessionMobileConnectTests {
 
         int sessionCountAfter = dataBaseHelper.getSessionsCount();
 
-        isTrue("Errors equal", apiHelper.checkErrorResponse(sessionMobileConnectRequest,
+        ResponseBody responseBody = apiHelper.sessionMobileConnectError(sessionMobileConnectRequest);
+
+        isTrue("Errors equal", apiHelper.checkErrorResponse(responseBody,
                 SESSION_WITH_ID_DOES_NOT_EXIST.getValue()));
         isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
     }
@@ -137,8 +140,9 @@ public class SessionMobileConnectTests {
 
         int sessionCountAfter = dataBaseHelper.getSessionsCount();
 
-        isTrue("Errors equal", apiHelper.checkErrorResponse(sessionMobileConnectRequest,
-                LIFE_TIME_DOES_NOT_EXIST.getValue()));
+        ResponseBody responseBody = apiHelper.sessionMobileConnectError(sessionMobileConnectRequest);
+
+        isTrue("Errors equal", apiHelper.checkErrorResponse(responseBody, LIFE_TIME_DOES_NOT_EXIST.getValue()));
         isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
     }
 
@@ -161,8 +165,9 @@ public class SessionMobileConnectTests {
 
         int sessionCountAfter = dataBaseHelper.getSessionsCount();
 
-        isTrue("Errors equal", apiHelper.checkErrorResponse(sessionMobileConnectRequest,
-                ERROR_REQUEST_PARAMETERS.getValue()));
+        ResponseBody responseBody = apiHelper.sessionMobileConnectError(sessionMobileConnectRequest);
+
+        isTrue("Errors equal", apiHelper.checkErrorResponse(responseBody, ERROR_REQUEST_PARAMETERS.getValue()));
         isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
     }
 }

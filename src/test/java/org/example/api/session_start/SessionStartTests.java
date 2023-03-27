@@ -1,5 +1,6 @@
 package org.example.api.session_start;
 
+import okhttp3.ResponseBody;
 import org.example.filebox.api.helpers.ApiHelper;
 import org.example.filebox.api.retrofit.models.session_start.SessionStartRequest;
 import org.example.filebox.api.retrofit.models.session_start.SessionStartResponse;
@@ -74,8 +75,10 @@ public class SessionStartTests {
 
         int sessionCountAfter = dataBaseHelper.getSessionsCount();
 
+        ResponseBody responseBody = apiHelper.sessionStartError(sessionStartRequest);
+
         isTrue("Errors equal",
-                apiHelper.checkErrorResponse(sessionStartRequest, ERROR_REQUEST_PARAMETERS.getValue()));
+                apiHelper.checkErrorResponse(responseBody, ERROR_REQUEST_PARAMETERS.getValue()));
         isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
     }
 }
