@@ -21,8 +21,7 @@ import java.util.stream.Stream;
 
 import static org.example.filebox.api.helpers.ErrorsEnum.*;
 import static org.example.filebox.helpers.DataHepler.*;
-import static org.example.filebox.helpers.LoggerHelper.isEquals;
-import static org.example.filebox.helpers.LoggerHelper.isTrue;
+import static org.example.filebox.helpers.LoggerHelper.*;
 
 public class DataSendTests {
 
@@ -80,8 +79,8 @@ public class DataSendTests {
         isEquals("db_idSession", idSession, dataDao.getIdSession());
         isEquals("db_type", type, dataDao.getType());
         isEquals("db_fileName", fileName, dataDao.getFileNameReal());
-        isEquals("db_timeStartExpected", timeStartExpected, convertTimeStampToSec(dataDao.getTimeBirth()));
-        isEquals("db_timeEndExpected", timeEndExpected, convertTimeStampToSec(dataDao.getTimeDeath()));
+        isEqualsTime("db_timeStartExpected", timeStartExpected, convertTimeStampToSec(dataDao.getTimeBirth()));
+        isEqualsTime("db_timeEndExpected", timeEndExpected, convertTimeStampToSec(dataDao.getTimeDeath()));
         isEquals("db_source", source, dataDao.getSource());
     }
 

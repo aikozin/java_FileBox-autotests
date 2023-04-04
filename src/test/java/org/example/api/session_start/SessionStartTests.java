@@ -20,8 +20,7 @@ import java.util.stream.Stream;
 
 import static org.example.filebox.api.helpers.ErrorsEnum.ERROR_REQUEST_PARAMETERS;
 import static org.example.filebox.helpers.DataHepler.*;
-import static org.example.filebox.helpers.LoggerHelper.isEquals;
-import static org.example.filebox.helpers.LoggerHelper.isTrue;
+import static org.example.filebox.helpers.LoggerHelper.*;
 
 public class SessionStartTests {
 
@@ -53,8 +52,8 @@ public class SessionStartTests {
         isEquals("db_idSessionJson", idSessionJson, sessionDao.getIdSession());
         isEquals("db_webAgent", webAgent, sessionDao.getWebAgent());
         isEquals("db_webIp", webIp, sessionDao.getWebIp());
-        isEquals("db_timeStartExpected", timeStartExpected, convertTimeStampToSec(sessionDao.getTimeStart()));
-        isEquals("db_timeEndExpected", timeEndExpected, convertTimeStampToSec(sessionDao.getTimeEnd()));
+        isEqualsTime("db_timeStartExpected", timeStartExpected, convertTimeStampToSec(sessionDao.getTimeStart()));
+        isEqualsTime("db_timeEndExpected", timeEndExpected, convertTimeStampToSec(sessionDao.getTimeEnd()));
     }
 
     private static Stream<Arguments> parametersSource() {

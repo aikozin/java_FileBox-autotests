@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 
 import static org.example.filebox.api.helpers.ErrorsEnum.*;
 import static org.example.filebox.helpers.DataHepler.*;
-import static org.example.filebox.helpers.LoggerHelper.isEquals;
-import static org.example.filebox.helpers.LoggerHelper.isTrue;
+import static org.example.filebox.helpers.LoggerHelper.*;
 
 public class SessionMobileConnectTests {
 
@@ -51,7 +50,7 @@ public class SessionMobileConnectTests {
     }
 
     @Test
-    @DisplayName("Подключение MOBILE к сессии с life_time по умолчанию")
+    @DisplayName("Подключение MOBILE к сессии")
     void sessionMobileConnect() throws IOException {
         String mobileIp = "192.168.1.2";
         String mobileAgent = "MobileApp";
@@ -62,7 +61,7 @@ public class SessionMobileConnectTests {
                 apiHelper.sessionMobileConnect(sessionMobileConnectRequest);
         long timeEndInSecondExpected = calculateEndTimeInSec(calculateStartTimeInSec(), 5);
 
-        isEquals("api_timeEndInSecond",
+        isEqualsTime("api_timeEndInSecond",
                 timeEndInSecondExpected, convertStringTimeStampToSec(sessionMobileConnectResponse.getTimeEnd()));
         isEquals("api_WEB_IP", WEB_IP, sessionMobileConnectResponse.getWebIp());
         isEquals("api_WEB_AGENT", WEB_AGENT, sessionMobileConnectResponse.getWebAgent());
@@ -70,7 +69,7 @@ public class SessionMobileConnectTests {
         SessionDao sessionDao = dataBaseHelper.findSession(idSession);
 
         isEquals("db_idSession", idSession, sessionDao.getIdSession());
-        isEquals("db_timeEndInSecond", timeEndInSecondExpected, convertTimeStampToSec(sessionDao.getTimeEnd()));
+        isEqualsTime("db_timeEndInSecond", timeEndInSecondExpected, convertTimeStampToSec(sessionDao.getTimeEnd()));
         isEquals("db_WEB_IP", WEB_IP, sessionDao.getWebIp());
         isEquals("db_WEB_AGENT", WEB_AGENT, sessionDao.getWebAgent());
         isEquals("db_mobileIp", mobileIp, sessionDao.getMobileIp());
@@ -78,14 +77,14 @@ public class SessionMobileConnectTests {
     }
 
     @Test
-    @DisplayName("Подключение MOBILE к сессии с life_time = infinity")
+    @DisplayName("Подключение MOBILE к сессии с infinity = true")
     void sessionMobileConnectInfinityLife() throws IOException {
         String mobileIp = "192.168.1.2";
         String mobileAgent = "MobileApp";
-        String lifeTime = "infinity";
+        boolean infinity = true;
 
         SessionMobileConnectRequest sessionMobileConnectRequest = new SessionMobileConnectRequest(idSession,
-                mobileIp, mobileAgent, lifeTime);
+                mobileIp, mobileAgent, infinity);
         SessionMobileConnectResponse sessionMobileConnectResponse =
                 apiHelper.sessionMobileConnect(sessionMobileConnectRequest);
         long timeEndInSecondExpected = calculateEndTimeInSec(calculateStartTimeInSec(), 365 * 24 * 60);
@@ -123,26 +122,6 @@ public class SessionMobileConnectTests {
 
         isTrue("Errors equal", apiHelper.checkErrorResponse(responseBody,
                 SESSION_WITH_ID_DOES_NOT_EXIST.getValue()));
-        isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
-    }
-
-    @Test
-    @DisplayName("Подключение MOBILE к сессии с несуществующим life_time")
-    void sessionMobileConnectNegativeLifeTime() throws IOException {
-        String mobileIp = "192.168.1.2";
-        String mobileAgent = "MobileApp";
-        String lifeTime = "minute";
-
-        int sessionCountBefore = dataBaseHelper.getSessionsCount();
-
-        SessionMobileConnectRequest sessionMobileConnectRequest = new SessionMobileConnectRequest(idSession,
-                mobileIp, mobileAgent, lifeTime);
-
-        int sessionCountAfter = dataBaseHelper.getSessionsCount();
-
-        ResponseBody responseBody = apiHelper.sessionMobileConnectError(sessionMobileConnectRequest);
-
-        isTrue("Errors equal", apiHelper.checkErrorResponse(responseBody, LIFE_TIME_DOES_NOT_EXIST.getValue()));
         isEquals("sessionCount", sessionCountAfter, sessionCountBefore);
     }
 

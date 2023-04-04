@@ -6,21 +6,21 @@ public class SessionMobileConnectRequest {
 
     @SerializedName("id_session")
     private String idSession;
-    @SerializedName("life_time")
-    private String lifeTime;
+    @SerializedName("infinity")
+    private boolean isInfinity;
     @SerializedName("mobile_agent")
     private String mobileAgent;
     @SerializedName("mobile_ip")
     private String mobileIp;
 
-    public SessionMobileConnectRequest(String idSession, String mobileIp, String mobileAgent, String lifeTime) {
+    public SessionMobileConnectRequest(String idSession, String mobileIp, String mobileAgent, boolean isInfinity) {
         this.idSession = idSession;
         this.mobileAgent = mobileAgent;
         this.mobileIp = mobileIp;
-        this.lifeTime = lifeTime;
+        this.isInfinity = isInfinity;
     }
 
-    public SessionMobileConnectRequest(String idSession,  String mobileIp, String mobileAgent) {
+    public SessionMobileConnectRequest(String idSession, String mobileIp, String mobileAgent) {
         this.idSession = idSession;
         this.mobileAgent = mobileAgent;
         this.mobileIp = mobileIp;
